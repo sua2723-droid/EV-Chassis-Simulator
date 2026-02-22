@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>EV Chassis Simulator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+
+  <!-- LEFT -->
+  <div class="sidebar">
+    <h2>Chassis Parts</h2>
+
+    <div class="controls">
+      <button id="undoBtn">↩ Undo</button>
+      <button id="resetBtn">🔄 Reset</button>
+    </div>
+
+    <div id="categories"></div>
+  </div>
+
+  <!-- CENTER -->
+  <div class="main">
+    <div class="chassis-container" id="drop-zone">
+      <div class="chassis-base">CHASSIS BASE</div>
+
+      <img id="steering-part" class="part-layer">
+      <img id="suspension-part" class="part-layer">
+      <img id="brakes-part" class="part-layer">
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="dashboard">
+    <h2>Performance</h2>
+
+    <canvas id="handlingGauge" width="200" height="200"></canvas>
+    <canvas id="efficiencyGauge" width="200" height="200"></canvas>
+    <canvas id="safetyGauge" width="200" height="200"></canvas>
+
+    <h3>Total Price: $<span id="total-price">0</span></h3>
+
+    <div class="selected-info">
+      <h3>Current Selection</h3>
+      <p>Steering: <span id="current-steering">None</span></p>
+      <p>Suspension: <span id="current-suspension">None</span></p>
+      <p>Brakes: <span id="current-brakes">None</span></p>
+    </div>
+
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
