@@ -1,79 +1,236 @@
+:root {
+  --gm-blue: #007bff;
+  --bg-dark: #05060a;
+  --panel-dark: #10131a;
+  --panel-darker: #0b0d13;
+  --text-muted: #a6b0c3;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  background: #111;
+  background: radial-gradient(circle at top, #151a24 0, var(--bg-dark) 55%, #020308 100%);
   color: white;
-  font-family: Arial;
+  font-family: Arial, sans-serif;
+}
+
+/* 상단 GM 로고 바 */
+.top-bar {
+  height: 56px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  background: rgba(3, 7, 16, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gm-logo {
+  height: 32px;
+  width: 32px;
+}
+
+.app-title {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
 }
 
 .container {
   display: flex;
-  height: 100vh;
+  height: calc(100vh - 56px);
 }
 
+/* LEFT SIDEBAR */
 .sidebar {
-  width: 20%;
+  width: 25%;  /* 조금 넓게 */
   padding: 20px;
-  background: #1c1c1c;
+  background: var(--panel-dark);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  overflow-y: auto;
 }
 
-.controls button {
+.sidebar h2 {
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.controls {
+  margin-bottom: 10px;
+}
+
+.controls button,
+.preset-controls button {
   width: 100%;
   padding: 8px;
   margin-bottom: 8px;
-  background: #555;
+  background: #1e2432;
   color: white;
-  border: none;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 4px;
   cursor: pointer;
+  font-size: 13px;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
 }
 
-.controls button:hover {
-  background: #777;
+/* 선택된 프리셋 버튼 하이라이트 */
+.preset-controls button.selected {
+  background: var(--gm-blue);
+  border-color: var(--gm-blue);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(0, 123, 255, 0.7);
 }
 
+/* 선택된 프리셋은 hover해도 파란색 유지 */
+.preset-controls button.selected:hover {
+  background: var(--gm-blue);
+  border-color: var(--gm-blue);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(0, 123, 255, 0.7);
+  transform: none;
+}
+
+.controls button:hover,
+.preset-controls button:hover {
+  background: #252d40;
+  border-color: rgba(0,123,255,0.7);
+  transform: translateY(-1px);
+}
+
+.preset-controls {
+  margin: 15px 0;
+  padding: 10px;
+  background: #151a24;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.preset-controls h3 {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* 카테고리: 3열 그리드 */
 .category {
   margin-bottom: 15px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
 }
 
-.category button {
+.category h3 {
+  margin: 8px 0;
+  font-size: 14px;
+  grid-column: 1 / -1;
+}
+
+/* 부품 카드: 큰 이미지 + 이름 + (숨겨진 spec) */
+.part-card {
+  background: #1e2432;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 10px;
+  margin-bottom: 0;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
+  text-align: center;
+}
+
+.part-card:hover {
+  background: #252d40;
+  border-color: rgba(0,123,255,0.7);
+  transform: translateY(-1px);
+}
+
+/* 썸네일 크게 */
+.part-card-thumbnail {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 6px;
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.part-card-thumbnail img {
   width: 100%;
-  margin: 3px 0;
-  padding: 6px;
-  background: #333;
-  color: white;
-  border: none;
-  cursor: grab;
+  height: 100%;
+  object-fit: contain;
 }
 
-.category button.disabled {
-  background: #555;
-  opacity: 0.5;
-  cursor: not-allowed;
+.part-card-title {
+  font-size: 12px;
+  margin: 0;
 }
 
+/* spec은 카드 내에서 숨김 (툴팁으로만) */
+.part-card-spec {
+  display: none;
+}
+
+/* 선택된 카드 */
+.part-card.selected {
+  background: var(--gm-blue);
+  border-color: var(--gm-blue);
+  box-shadow: 0 0 12px rgba(0, 123, 255, 0.8);
+}
+
+/* CENTER */
 .main {
-  width: 50%;
+  width: 55%;  /* 25 + 55 + 20 = 100 */
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
+/* 샤시 컨테이너: 박스 제거, 이미지만 크게 */
 .chassis-container {
   position: relative;
-  width: 600px;
-  height: 300px;
-  border: 2px dashed #444;
+  width: 90%;
+  max-width: 800px;
+  height: 420px;
+  margin: 0 auto;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
+/* Handling 높음 */
+.chassis-container.high-handling {
+  box-shadow: 0 0 26px rgba(0, 123, 255, 0.7);
+}
+
+/* Safety 낮음 */
+.chassis-container.low-safety {
+  box-shadow: 0 0 22px rgba(255, 165, 0, 0.7);
+}
+
+/* 샤시 베이스 */
 .chassis-base {
   width: 100%;
   height: 100%;
-  background: #444;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
+  background-image: url("images/chassis_base.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
+/* 공통 파트 레이어 */
 .part-layer {
   position: absolute;
   top: 0;
@@ -83,20 +240,80 @@ body {
   object-fit: contain;
   opacity: 0;
   transition: opacity 0.4s ease;
+  pointer-events: none;
 }
 
 .part-layer.show {
   opacity: 1;
 }
 
+/* RIGHT DASHBOARD */
 .dashboard {
-  width: 30%;
+  width: 20%;
   padding: 20px;
-  background: #1a1a1a;
+  background: var(--panel-darker);
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
+  overflow-y: auto;
+}
+
+.dashboard h2 {
+  margin-top: 0;
 }
 
 .selected-info {
   margin-top: 20px;
   background: #333;
   padding: 10px;
+  border-radius: 6px;
+}
+
+/* 게이지를 세로 한 줄씩 */
+.dashboard canvas {
+  display: block;
+  margin: 0 auto 16px;
+}
+
+/* Toast */
+#toast {
+  position: fixed;
+  top: 70px;
+  right: 24px;
+  padding: 8px 14px;
+  background: rgba(15, 23, 42, 0.95);
+  border-radius: 6px;
+  color: #e5f1ff;
+  font-size: 13px;
+  border: 1px solid rgba(0, 123, 255, 0.7);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 1000;
+}
+
+#toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 샤시 한 줄 요약 텍스트 */
+.chassis-summary {
+  position: absolute;
+  left: 50%;
+  top: -52px;
+  transform: translateX(-50%);
+  padding: 8px 18px;
+  background: rgba(0, 0, 0, 0.75);
+  border-radius: 999px;
+  font-size: 18px;
+  color: #e5f1ff;
+  white-space: nowrap;
+  max-width: 95%;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.9);
+  z-index: 5;
 }

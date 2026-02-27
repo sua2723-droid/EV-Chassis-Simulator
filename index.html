@@ -7,6 +7,13 @@
 </head>
 <body>
 
+<header class="top-bar">
+  <div class="brand">
+    <img src="images/gm-symbol-color-light-bg-web.png" alt="GM" class="gm-logo">
+    <span class="app-title">EV Chassis Simulator</span>
+  </div>
+</header>
+
 <div class="container">
 
   <!-- LEFT -->
@@ -18,17 +25,30 @@
       <button id="resetBtn">🔄 Reset</button>
     </div>
 
+    <div class="preset-controls">
+      <h3>Presets</h3>
+      <button data-preset="off-road" onclick="applyPreset('off-road')">Off-road Package</button>
+      <button data-preset="Sport" onclick="applyPreset('Sport')">Sport Package</button>
+      <button data-preset="city" onclick="applyPreset('city')">City Package</button>
+    </div>
+
     <div id="categories"></div>
   </div>
 
   <!-- CENTER -->
   <div class="main">
     <div class="chassis-container" id="drop-zone">
-      <div class="chassis-base">CHASSIS BASE</div>
+      <div class="chassis-base"></div>
 
-      <img id="steering-part" class="part-layer">
+      <img id="link-part" class="part-layer">
       <img id="suspension-part" class="part-layer">
       <img id="brakes-part" class="part-layer">
+      <img id="steering-part" class="part-layer">
+
+      <!-- 샤시 요약 텍스트 오버레이 -->
+      <div id="chassis-summary" class="chassis-summary">
+        Select a package to see performance summary.
+      </div>
     </div>
   </div>
 
@@ -44,14 +64,17 @@
 
     <div class="selected-info">
       <h3>Current Selection</h3>
-      <p>Steering: <span id="current-steering">None</span></p>
+      <p>Link: <span id="current-link">None</span></p>
       <p>Suspension: <span id="current-suspension">None</span></p>
       <p>Brakes: <span id="current-brakes">None</span></p>
+      <p>Steering: <span id="current-steering">None</span></p>
     </div>
-
   </div>
 
 </div>
+
+<!-- Toast -->
+<div id="toast"></div>
 
 <script src="script.js"></script>
 </body>
