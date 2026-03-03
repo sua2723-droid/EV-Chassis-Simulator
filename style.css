@@ -166,10 +166,10 @@ body {
 }
 
 .part-card-thumbnail img {
-  width: 170%;
-  height: 170%;
+  width: 160%;
+  height: 160%;
   object-fit: cover;    /* 꽉 채우고 남는 건 잘라냄 */
-  transform: translate(+5%, -30%);
+  transform: translate(+7%, -30%);
 }
 
 .part-card-title {
@@ -247,8 +247,8 @@ body {
 .part-layer.show {
   opacity: 1;}
 
-.steering-layer { z-index: 4; }
-.brakes-layer   { z-index: 3; }
+.steering-layer { z-index: 3; }
+.brakes-layer   { z-index: 4; }
 .link-layer    { position:absolute; z-index: 2; }
 .suspension-layer { position:absolute; z-index: 1; } 
 
@@ -306,7 +306,7 @@ body {
 .chassis-summary {
   position: absolute;
   left: 50%;
-  top: -52px;
+  top: -64px;
   transform: translateX(-50%);
   padding: 8px 18px;
   background: rgba(0, 0, 0, 0.75);

@@ -134,7 +134,7 @@ categoryOrder.forEach(category => {
 
     card.title =
       `Handling: ${part.handling} | Comfort: ${part.comfort} | ` +
-      `Efficiency: ${part.efficiency} | Safety: ${part.safety} | Price: $${part.price}`;
+      `Efficiency: ${part.efficiency} | Safety: ${part.safety}`;
 
     const thumbWrap = document.createElement("div");
     thumbWrap.className = "part-card-thumbnail";
@@ -168,8 +168,8 @@ categoryOrder.forEach(category => {
   // 🔹 드래그 프리뷰용 큰 썸네일 만들기
   const dragImg = document.createElement("img");
   dragImg.src = part.image;
-  dragImg.style.width = "360px";   // 원하는 크기
-  dragImg.style.height = "360px";
+  dragImg.style.width = "400px";   // 원하는 크기
+  dragImg.style.height = "400px";
   dragImg.style.objectFit = "cover";
   dragImg.style.position = "absolute";
   dragImg.style.top = "-9999px";   // 화면 밖에 숨기기
@@ -179,7 +179,7 @@ categoryOrder.forEach(category => {
     // 썸네일에서 translate(+5%, -30%) 적용된 "시각적 중심"에 맞춰서 포인터 위치 조정
   const DRAG_SIZE = 160;
   const offsetX = DRAG_SIZE * 0.55; // 50% + 5%
-  const offsetY = DRAG_SIZE * 0.60; // 50% - 30%
+  const offsetY = DRAG_SIZE * 0.80; // 50% - 30%
 
   //  드래그 이미지 설정
    e.dataTransfer.setDragImage(dragImg, offsetX, offsetY);
@@ -221,33 +221,34 @@ const presets = {
 };
 
 // =====================
-// 합계 계산 (Comfort는 게이지에 아직 미사용)
+// 합계 계산 
 // =====================
 function getTotals() {
   let handling = 0;
   let efficiency = 0;
   let safety = 0;
-  let totalPrice = 0;
+  let comfort = 0;
 
   Object.values(selectedParts).forEach(part => {
     handling += part.handling;
     efficiency += part.efficiency;
     safety += part.safety;
-    totalPrice += part.price;
+    comfort += part.comfort;
   });
 
-  return { handling, efficiency, safety, totalPrice };
+  return { handling, efficiency, safety, comfort };
 }
 
-function getSummaryText(handling, efficiency, safety) {
-  const total = handling + efficiency + safety;
+function getSummaryText(handling, efficiency, safety, comfort) {
+  const total = handling + efficiency + safety + comfort;
   if (total === 0) {
-    return "Select a package to see performance summary.";
+    return "Select chassis parts";
   }
 
   const h = handling / total;
   const e = efficiency / total;
   const s = safety / total;
+  const c = comfort / total;
 
   if (h >= 0.5 && handling >= 40) {
     return "Aggressive, handling‑focused sport setup.";
@@ -259,6 +260,10 @@ function getSummaryText(handling, efficiency, safety) {
     return "Efficiency‑focused setup for extended driving range.";
   }
 
+  if (c >= 0.5 && comfort >= 30) {
+    return "Comfort-focused setup for relaxed driving.";
+  }
+
   if (h >= s && h >= e) {
     return "Dynamic setup balancing agility and stability.";
   }
@@ -268,10 +273,10 @@ function getSummaryText(handling, efficiency, safety) {
   return "Balanced setup for versatile everyday driving.";
 }
 
-function updateChassisSummary(handling, efficiency, safety) {
+function updateChassisSummary(handling, efficiency, safety, comfort) {
   const el = document.getElementById("chassis-summary");
   if (!el) return;
-  el.textContent = getSummaryText(handling, efficiency, safety);
+  el.textContent = getSummaryText(handling, efficiency, safety, comfort);
 }
 
 // 샤시 하이라이트
@@ -350,6 +355,7 @@ function applyPreset(name) {
   const dh = nextTotals.handling - prevTotals.handling;
   const de = nextTotals.efficiency - prevTotals.efficiency;
   const ds = nextTotals.safety - prevTotals.safety;
+  const dc = nextTotals.comfort - prevTotals.comfort;
 
   const sym = d => (d > 0 ? "+" : d < 0 ? "−" : "·");
 
@@ -360,7 +366,7 @@ function applyPreset(name) {
   };
   const presetLabel = labelMap[name] || name;
 
-  const msg = `${presetLabel} Package applied (H ${sym(dh)}, E ${sym(de)}, S ${sym(ds)})`;
+  const msg = `${presetLabel} Package applied (H ${sym(dh)}, E ${sym(de)}, S ${sym(ds)}, C ${sym(dc)})`;
   showToast(msg);
   playSwapSound();
 }
@@ -479,16 +485,15 @@ function updateButtonStates() {
 // 대시보드
 // =====================
 function updateDashboard() {
-  const { handling, efficiency, safety, totalPrice } = getTotals();
+  const { handling, efficiency, safety, comfort } = getTotals();
 
   updateChassisHighlight(handling, safety);
-  updateChassisSummary(handling, efficiency, safety);
+  updateChassisSummary(handling, efficiency, safety, comfort);
 
-  drawGauge("handlingGauge", handling, "Handling");
+  drawGauge("handlingGauge",   handling,   "Handling");
   drawGauge("efficiencyGauge", efficiency, "Efficiency");
-  drawGauge("safetyGauge", safety, "Safety");
-
-  document.getElementById("total-price").innerText = totalPrice;
+  drawGauge("safetyGauge",     safety,     "Safety");
+  drawGauge("comfortGauge",    comfort,    "Comfort");   
 }
 
 // =====================
