@@ -176,8 +176,13 @@ categoryOrder.forEach(category => {
   dragImg.style.left = "-9999px";
   document.body.appendChild(dragImg);
 
-  // (중심 기준으로) 드래그 이미지 설정
-  e.dataTransfer.setDragImage(dragImg, 80, 80);
+    // 썸네일에서 translate(+5%, -30%) 적용된 "시각적 중심"에 맞춰서 포인터 위치 조정
+  const DRAG_SIZE = 160;
+  const offsetX = DRAG_SIZE * 0.55; // 50% + 5%
+  const offsetY = DRAG_SIZE * 0.60; // 50% - 30%
+
+  //  드래그 이미지 설정
+   e.dataTransfer.setDragImage(dragImg, offsetX, offsetY);
 
   // 드래그 끝나면 DOM에서 제거
   card.addEventListener("dragend", () => {

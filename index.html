@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>EV Chassis Simulator</title>
+  <title>HDV Chassis Simulator</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -10,7 +10,7 @@
 <header class="top-bar">
   <div class="brand">
     <img src="images/gm-symbol-color-light-bg-web.png" alt="GM" class="gm-logo">
-    <span class="app-title">EV Chassis Simulator</span>
+    <span class="app-title">HDV Chassis Simulator</span>
   </div>
 </header>
 
@@ -40,10 +40,10 @@
     <div class="chassis-container" id="drop-zone">
       <div class="chassis-base"></div>
 
-      <img id="link-part" class="part-layer">
-      <img id="suspension-part" class="part-layer">
-      <img id="brakes-part" class="part-layer">
-      <img id="steering-part" class="part-layer">
+      <img id="link-part" class="part-layer link-layer">
+      <img id="suspension-part" class="part-layer suspension-layer">
+      <img id="brakes-part" class="part-layer brakes-layer">
+      <img id="steering-part" class="part-layer steering-layer">
 
       <!-- 샤시 요약 텍스트 오버레이 -->
       <div id="chassis-summary" class="chassis-summary">
@@ -59,6 +59,7 @@
     <canvas id="handlingGauge" width="200" height="200"></canvas>
     <canvas id="efficiencyGauge" width="200" height="200"></canvas>
     <canvas id="safetyGauge" width="200" height="200"></canvas>
+    <canvas id="comfortGauge" width="200" height="200"></canvas>
 
     <h3>Total Price: $<span id="total-price">0</span></h3>
 

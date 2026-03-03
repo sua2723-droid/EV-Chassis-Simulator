@@ -36,8 +36,8 @@ body {
 }
 
 .gm-logo {
-  height: 32px;
-  width: 32px;
+  height: 45px;
+  width: 45px;
 }
 
 .app-title {
@@ -245,8 +245,12 @@ body {
 }
 
 .part-layer.show {
-  opacity: 1;
-}
+  opacity: 1;}
+
+.steering-layer { z-index: 4; }
+.brakes-layer   { z-index: 3; }
+.link-layer    { position:absolute; z-index: 2; }
+.suspension-layer { position:absolute; z-index: 1; } 
 
 /* RIGHT DASHBOARD */
 .dashboard {
