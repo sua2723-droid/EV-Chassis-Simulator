@@ -10,7 +10,7 @@ const partsData = {
       efficiency: 14,
       safety: 18,
       price: 2200,
-      image: "images/dw.png"
+      image: "images/link_front_dw.png"
     },
     {
       name: "Front SLA (Short-Long Arm)",
@@ -162,9 +162,28 @@ categoryOrder.forEach(category => {
 
     card.onclick = () => selectPart(category, index);
     card.addEventListener("dragstart", e => {
-      e.dataTransfer.setData("category", category);
-      e.dataTransfer.setData("index", index);
-    });
+  e.dataTransfer.setData("category", category);
+  e.dataTransfer.setData("index", index);
+
+  // 🔹 드래그 프리뷰용 큰 썸네일 만들기
+  const dragImg = document.createElement("img");
+  dragImg.src = part.image;
+  dragImg.style.width = "360px";   // 원하는 크기
+  dragImg.style.height = "360px";
+  dragImg.style.objectFit = "cover";
+  dragImg.style.position = "absolute";
+  dragImg.style.top = "-9999px";   // 화면 밖에 숨기기
+  dragImg.style.left = "-9999px";
+  document.body.appendChild(dragImg);
+
+  // (중심 기준으로) 드래그 이미지 설정
+  e.dataTransfer.setDragImage(dragImg, 80, 80);
+
+  // 드래그 끝나면 DOM에서 제거
+  card.addEventListener("dragend", () => {
+    dragImg.remove();
+  }, { once: true });
+});
 
     div.appendChild(card);
   });
