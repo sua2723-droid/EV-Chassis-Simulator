@@ -252,19 +252,19 @@ body {
 /* RIGHT DASHBOARD */
 .dashboard {
   width: 20%;
-  padding: 16px 16px 8px;
+  padding: 12px 12px 4px;
   background: var(--panel-darker);
   border-left: 1px solid rgba(255, 255, 255, 0.06);
   overflow-y: hidden;
 }
 
 .dashboard h2 {
- margin: 0 0 10px 0;  
+ margin: 0 0 6px 0;  
 }
 
 .dashboard canvas {
   display: block;
-  margin: 0 auto 10px;
+  margin: 0 auto 8px;
 }
 
 /* 게이지 변화 텍스트 (작은 +X / -Y) */
