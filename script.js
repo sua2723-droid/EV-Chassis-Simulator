@@ -1,15 +1,22 @@
 // =====================
-// 파트 데이터 (Link 3 / Suspension 2 / Brakes 3 / Steering 2)
+// 파트 데이터
 // =====================
 const partsData = {
   Link: [
+    {
+      name: "MacPherson strut",
+      handling: 22,
+      comfort: 22,
+      efficiency: 17,
+      safety: 18,
+      image: "images/link_front_macpherson.png"   // 단독용 이미지
+    },
     {
       name: "Front Double Wishbone",
       handling: 28,
       comfort: 15,
       efficiency: 14,
       safety: 18,
-      price: 2200,
       image: "images/link_front_dw.png"
     },
     {
@@ -18,17 +25,7 @@ const partsData = {
       comfort: 14,
       efficiency: 13,
       safety: 19,
-      price: 2600,
       image: "images/link_front_sla.png"
-    },
-    {
-      name: "MacPherson strut",
-      handling: 22,
-      comfort: 22,
-      efficiency: 17,
-      safety: 18,
-      price: 2000,
-      image: "images/link_front_MacPhersonstrut.png"
     }
   ],
 
@@ -39,7 +36,6 @@ const partsData = {
       comfort: 22,
       efficiency: 18,
       safety: 15,
-      price: 1500,
       image: "images/coil.png"
     },
     {
@@ -48,7 +44,6 @@ const partsData = {
       comfort: 28,
       efficiency: 14,
       safety: 20,
-      price: 2800,
       image: "images/air.png"
     }
   ],
@@ -60,8 +55,9 @@ const partsData = {
       comfort: 26,
       efficiency: 22,
       safety: 22,
-      price: 1200,
-      image: "images/brake_module1_city.png"
+      image: "images/brake_module1_city.png",
+      imageLeft:  "images/brake_module1_city_left.png",
+      imageRight: "images/brake_module1_city_right.png"
     },
     {
       name: "Module 2 – Sport",
@@ -69,8 +65,9 @@ const partsData = {
       comfort: 16,
       efficiency: 16,
       safety: 32,
-      price: 2200,
-      image: "images/brake_module2_sport.png"
+      image: "images/brake_module2_sport.png",
+      imageLeft:  "images/brake_module2_sport_left.png",
+      imageRight: "images/brake_module2_sport_right.png"
     },
     {
       name: "Module 3 – Off-road HD",
@@ -78,8 +75,9 @@ const partsData = {
       comfort: 18,
       efficiency: 14,
       safety: 34,
-      price: 2500,
-      image: "images/brake_module3_offroad.png"
+      image: "images/brake_module3_offroad.png",
+      imageLeft:  "images/brake_module3_offroad_left.png",
+      imageRight: "images/brake_module3_offroad_right.png"
     }
   ],
 
@@ -90,7 +88,6 @@ const partsData = {
       comfort: 22,
       efficiency: 20,
       safety: 18,
-      price: 1800,
       image: "images/steering_rack_eps.png"
     },
     {
@@ -99,31 +96,44 @@ const partsData = {
       comfort: 18,
       efficiency: 15,
       safety: 24,
-      price: 2000,
       image: "images/steering_recirculating_ball.png"
     }
   ]
 };
 
-// 왼쪽 카테고리 순서
 const categoryOrder = ["Link", "Suspension", "Brakes", "Steering"];
 
 let selectedParts = {};
-let historyStack = [];      // { type: "part", ... } or { type: "preset", previousParts }
+let historyStack = [];
 let toastTimeoutId = null;
 let activePreset = null;
+let summaryHidden = false;
+
+// 🔹 이전 게이지 값 저장
+let lastGaugeValues = {
+  handling: 0,
+  efficiency: 0,
+  safety: 0,
+  comfort: 0
+};
 
 const categoriesDiv = document.getElementById("categories");
 
 // =====================
-// 카테고리 UI (3열 카드)
+// 카테고리 UI
 // =====================
 categoryOrder.forEach(category => {
   const div = document.createElement("div");
   div.className = "category";
+  div.dataset.category = category;
 
   const title = document.createElement("h3");
-  title.innerText = category;
+  // Suspension → Shock Absorbers 로 표시
+  if (category === "Suspension") {
+    title.innerText = "Shock Absorbers";
+  } else {
+    title.innerText = category;
+  }
   div.appendChild(title);
 
   partsData[category].forEach((part, index) => {
@@ -161,34 +171,46 @@ categoryOrder.forEach(category => {
     card.appendChild(body);
 
     card.onclick = () => selectPart(category, index);
-    card.addEventListener("dragstart", e => {
-  e.dataTransfer.setData("category", category);
-  e.dataTransfer.setData("index", index);
 
-  // 🔹 드래그 프리뷰용 큰 썸네일 만들기
-  const dragImg = document.createElement("img");
-  dragImg.src = part.image;
-  dragImg.style.width = "400px";   // 원하는 크기
-  dragImg.style.height = "400px";
-  dragImg.style.objectFit = "cover";
+    card.addEventListener("dragstart", e => {
+      e.dataTransfer.setData("category", category);
+      e.dataTransfer.setData("index", index);
+
+      const dragImg = document.createElement("img");
+      dragImg.src = part.image;
+
+      const DRAG_SIZE = 640;                // 드래그 썸네일 한 변 길이
+  dragImg.style.width = DRAG_SIZE + "px";
+  dragImg.style.height = DRAG_SIZE + "px";
+  dragImg.style.objectFit = "contain";  // 잘리지 않게 전체 보이기
+  dragImg.style.imageRendering = "auto"; // (기본값이지만 명시)
   dragImg.style.position = "absolute";
-  dragImg.style.top = "-9999px";   // 화면 밖에 숨기기
+  dragImg.style.top = "-9999px";
   dragImg.style.left = "-9999px";
   document.body.appendChild(dragImg);
 
-    // 썸네일에서 translate(+5%, -30%) 적용된 "시각적 중심"에 맞춰서 포인터 위치 조정
-  const DRAG_SIZE = 160;
-  const offsetX = DRAG_SIZE * 0.55; // 50% + 5%
-  const offsetY = DRAG_SIZE * 0.80; // 50% - 30%
+  // 🔹 포인터 위치: 정중앙 근처
+  const offsetX = DRAG_SIZE *0.35;
+  const offsetY = DRAG_SIZE *0.55;
+  /*
+      dragImg.style.width = "400px";
+      dragImg.style.height = "400px";
+      dragImg.style.objectFit = "contain";
+      dragImg.style.position = "absolute";
+      dragImg.style.top = "-9999px";
+      dragImg.style.left = "-9999px";
+      document.body.appendChild(dragImg);
 
-  //  드래그 이미지 설정
-   e.dataTransfer.setDragImage(dragImg, offsetX, offsetY);
+      const DRAG_SIZE = 240;
+      const offsetX = DRAG_SIZE * 0.55;
+      const offsetY = DRAG_SIZE * 0.80;
+*/
+      e.dataTransfer.setDragImage(dragImg, offsetX, offsetY);
 
-  // 드래그 끝나면 DOM에서 제거
-  card.addEventListener("dragend", () => {
-    dragImg.remove();
-  }, { once: true });
-});
+      card.addEventListener("dragend", () => {
+        dragImg.remove();
+      }, { once: true });
+    });
 
     div.appendChild(card);
   });
@@ -197,31 +219,31 @@ categoryOrder.forEach(category => {
 });
 
 // =====================
-// 프리셋 정의 (새 인덱스 기준)
+// 프리셋
 // =====================
 const presets = {
-  "off-road": {
-    Link: 2,        // Rear 5-link + Coil
-    Suspension: 1,  // Rear 5-link + Air
-    Brakes: 2,      // Module 3 – Off-road HD
-    Steering: 1     // Recirculating Ball + Assist
+  "city": {
+    Link: 0,
+    Suspension: 0,
+    Brakes: 0,
+    Steering: 0
   },
   "Sport": {
-    Link: 1,        // Front SLA
-    Suspension: 0,  // Front MacPherson
-    Brakes: 1,      // Module 2 – Sport
-    Steering: 0     // Rack & Pinion EPS
+    Link: 2,
+    Suspension: 0,
+    Brakes: 1,
+    Steering: 0
   },
-  "city": {
-    Link: 0,        // Front Double Wishbone (예시)
-    Suspension: 0,  // Front MacPherson
-    Brakes: 0,      // Comfort/City
-    Steering: 0     // Rack & Pinion EPS
+  "off-road": {
+    Link: 1,
+    Suspension: 1,
+    Brakes: 2,
+    Steering: 1
   }
 };
 
 // =====================
-// 합계 계산 
+// 합계 계산
 // =====================
 function getTotals() {
   let handling = 0;
@@ -230,54 +252,102 @@ function getTotals() {
   let comfort = 0;
 
   Object.values(selectedParts).forEach(part => {
-    handling += part.handling;
-    efficiency += part.efficiency;
-    safety += part.safety;
-    comfort += part.comfort;
+    handling   += part.handling   || 0;
+    efficiency += part.efficiency || 0;
+    safety     += part.safety     || 0;
+    comfort    += part.comfort    || 0;
   });
 
   return { handling, efficiency, safety, comfort };
 }
 
-function getSummaryText(handling, efficiency, safety, comfort) {
-  const total = handling + efficiency + safety + comfort;
-  if (total === 0) {
-    return "Select chassis parts";
+// =====================
+// 샤시 코너 이미지 업데이트 (맥퍼슨 조합 포함)
+// =====================
+function updateCornerLayers() {
+  const link  = selectedParts.Link  || null;
+  const susp  = selectedParts.Suspension || null;
+  const brake = selectedParts.Brakes || null;
+  const steer = selectedParts.Steering || null;
+
+  const linkLayer   = document.getElementById("link-part");
+  const suspLayer   = document.getElementById("suspension-part");
+  const brakeLeft   = document.getElementById("brakes-left-part");
+  const brakeRight  = document.getElementById("brakes-right-part");
+  const steerLayer  = document.getElementById("steering-part");
+
+  if (!linkLayer || !suspLayer || !brakeLeft || !brakeRight || !steerLayer) return;
+
+  [linkLayer, suspLayer, brakeLeft, brakeRight, steerLayer].forEach(el => {
+    el.classList.remove("show");
+  });
+
+  // 스티어링
+  if (steer) {
+    steerLayer.src = steer.image;
+    steerLayer.classList.add("show");
   }
 
-  const h = handling / total;
-  const e = efficiency / total;
-  const s = safety / total;
-  const c = comfort / total;
-
-  if (h >= 0.5 && handling >= 40) {
-    return "Aggressive, handling‑focused sport setup.";
-  }
-  if (s >= 0.5 && safety >= 40) {
-    return "Safety‑oriented, stable chassis configuration.";
-  }
-  if (e >= 0.5 && efficiency >= 30) {
-    return "Efficiency‑focused setup for extended driving range.";
+  // 브레이크 좌/우
+  if (brake) {
+    if (brake.imageLeft) {
+      brakeLeft.src = brake.imageLeft;
+      brakeLeft.classList.add("show");
+    }
+    if (brake.imageRight) {
+      brakeRight.src = brake.imageRight;
+      brakeRight.classList.add("show");
+    }
   }
 
-  if (c >= 0.5 && comfort >= 30) {
-    return "Comfort-focused setup for relaxed driving.";
+  // MacPherson + Suspension 조합
+  if (link && link.name === "MacPherson strut") {
+    if (!susp) {
+      linkLayer.src = "images/link_front_macpherson.png";
+      linkLayer.classList.add("show");
+    } else if (susp.name === "coil spring") {
+      linkLayer.src = "images/macpherson_coil.png";
+      linkLayer.classList.add("show");
+    } else if (susp.name === "Air Suspension") {
+      linkLayer.src = "images/macpherson_air.png";
+      linkLayer.classList.add("show");
+    } else {
+      linkLayer.src = "images/link_front_macpherson.png";
+      linkLayer.classList.add("show");
+      suspLayer.src = susp.image;
+      suspLayer.classList.add("show");
+    }
+    return;
   }
 
-  if (h >= s && h >= e) {
-    return "Dynamic setup balancing agility and stability.";
+  // 나머지 링크 타입 (DW, SLA 등)
+  if (link) {
+    linkLayer.src = link.image;
+    linkLayer.classList.add("show");
   }
-  if (s >= h && s >= e) {
-    return "Comfortable, confidence‑inspiring daily setup.";
+  if (susp) {
+    suspLayer.src = susp.image;
+    suspLayer.classList.add("show");
   }
-  return "Balanced setup for versatile everyday driving.";
 }
 
-function updateChassisSummary(handling, efficiency, safety, comfort) {
+// =====================
+// 요약 텍스트 (선택 전만 표시)
+// =====================
+function updateChassisSummary() {
   const el = document.getElementById("chassis-summary");
   if (!el) return;
-  el.textContent = getSummaryText(handling, efficiency, safety, comfort);
+
+  if (summaryHidden) {
+    // 🔹 선택 이후엔 배지 전체를 숨김
+    el.style.display = "none";
+  } else {
+    // 초기 상태: 배지 보이고 텍스트 표시
+    el.style.display = "block";
+    el.textContent = "Select chassis parts";
+  }
 }
+
 
 // 샤시 하이라이트
 function updateChassisHighlight(handling, safety) {
@@ -296,9 +366,7 @@ function showToast(message) {
   toast.textContent = message;
   toast.classList.add("show");
 
-  if (toastTimeoutId) {
-    clearTimeout(toastTimeoutId);
-  }
+  if (toastTimeoutId) clearTimeout(toastTimeoutId);
   toastTimeoutId = setTimeout(() => {
     toast.classList.remove("show");
   }, 2000);
@@ -314,39 +382,26 @@ function updatePresetButtons() {
 }
 
 // =====================
-// 프리셋 적용 (Undo 한 번에 전체 롤백)
+// 프리셋 적용
 // =====================
 function applyPreset(name) {
   const preset = presets[name];
   if (!preset) return;
 
   const prevTotals = getTotals();
-  const prevParts = { ...selectedParts }; // 스냅샷
+  const prevParts = { ...selectedParts };
   historyStack.push({ type: "preset", previousParts: prevParts });
 
-  // 현재 레이어 초기화
   selectedParts = {};
-  ["link", "suspension", "brakes", "steering"].forEach(id => {
-    const layer = document.getElementById(id + "-part");
-    if (layer) layer.classList.remove("show");
-  });
-
-  // 새 프리셋 파츠 적용 (히스토리 안 쌓고 바로 세팅)
   Object.entries(preset).forEach(([category, index]) => {
-    const part = partsData[category][index];
-    selectedParts[category] = part;
-
-    const layer = document.getElementById(category.toLowerCase() + "-part");
-    if (layer) {
-      layer.src = part.image;
-      layer.classList.add("show");
-    }
+    selectedParts[category] = partsData[category][index];
   });
 
   const nextTotals = getTotals();
 
+  summaryHidden = true;
+  updateCornerLayers();
   updateDashboard();
-  updateSelectionUI();
   updateButtonStates();
 
   activePreset = name;
@@ -357,17 +412,14 @@ function applyPreset(name) {
   const ds = nextTotals.safety - prevTotals.safety;
   const dc = nextTotals.comfort - prevTotals.comfort;
 
+  /*
   const sym = d => (d > 0 ? "+" : d < 0 ? "−" : "·");
-
-  const labelMap = {
-    "off-road": "Off-road",
-    "Sport": "Sport",
-    "city": "City"
-  };
+  const labelMap = { "off-road": "Off-road", "Sport": "Sport", "city": "City" };
   const presetLabel = labelMap[name] || name;
 
   const msg = `${presetLabel} Package applied (H ${sym(dh)}, E ${sym(de)}, S ${sym(ds)}, C ${sym(dc)})`;
   showToast(msg);
+*/
   playSwapSound();
 }
 
@@ -382,15 +434,10 @@ function selectPart(category, index) {
 
   selectedParts[category] = part;
 
-  const layer = document.getElementById(category.toLowerCase() + "-part");
-  if (layer) {
-    layer.src = part.image;
-    layer.classList.add("show");
-  }
-
+  summaryHidden = true;
+  updateCornerLayers();
   playSwapSound();
   updateDashboard();
-  updateSelectionUI();
   updateButtonStates();
 }
 
@@ -403,43 +450,24 @@ document.getElementById("undoBtn").addEventListener("click", () => {
   const last = historyStack.pop();
 
   if (last.type === "preset") {
-    // 프리셋 전체 되돌리기
     selectedParts = { ...last.previousParts };
-
-    ["steering", "suspension", "brakes"].forEach(id => {
-      const layer = document.getElementById(id + "-part");
-      if (layer) layer.classList.remove("show");
-    });
-
-    Object.entries(selectedParts).forEach(([category, part]) => {
-      if (!part) return;
-      const layer = document.getElementById(category.toLowerCase() + "-part");
-      if (layer) {
-        layer.src = part.image;
-        layer.classList.add("show");
-      }
-    });
-
     activePreset = null;
     updatePresetButtons();
   } else if (last.type === "part") {
     const { category, previousPart } = last;
-    const layer = document.getElementById(category.toLowerCase() + "-part");
-
     if (previousPart) {
       selectedParts[category] = previousPart;
-      if (layer) {
-        layer.src = previousPart.image;
-        layer.classList.add("show");
-      }
     } else {
       delete selectedParts[category];
-      if (layer) layer.classList.remove("show");
     }
   }
 
+  if (Object.keys(selectedParts).length === 0) {
+    summaryHidden = false;
+  }
+
+  updateCornerLayers();
   updateDashboard();
-  updateSelectionUI();
   updateButtonStates();
 });
 
@@ -451,13 +479,17 @@ document.getElementById("resetBtn").addEventListener("click", () => {
   historyStack = [];
   activePreset = null;
 
-  ["link", "steering", "suspension", "brakes"].forEach(id => {
-    const layer = document.getElementById(id + "-part");
-    if (layer) layer.classList.remove("show");
-  });
+  summaryHidden = false;
+  
+    lastGaugeValues = {
+    handling: 0,
+    efficiency: 0,
+    safety: 0,
+    comfort: 0
+  };
 
+  updateCornerLayers();
   updateDashboard();
-  updateSelectionUI();
   updateButtonStates();
   updatePresetButtons();
 });
@@ -467,7 +499,7 @@ document.getElementById("resetBtn").addEventListener("click", () => {
 // =====================
 function updateButtonStates() {
   document.querySelectorAll(".category").forEach(div => {
-    const category = div.querySelector("h3").innerText;
+    const category = div.dataset.category;
     const cards = div.querySelectorAll(".part-card");
     const selected = selectedParts[category];
 
@@ -482,74 +514,98 @@ function updateButtonStates() {
 }
 
 // =====================
+// 게이지 애니메이션 + Δ 표시
+// =====================
+function animateGauge(id, from, to, label, duration = 400) {
+  const canvas = document.getElementById(id);
+  const ctx = canvas.getContext("2d");
+  const start = performance.now();
+  const diff = to - from;
+
+  function frame(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - t, 3); // ease-out
+    const current = from + diff * eased;
+
+    ctx.clearRect(0, 0, 200, 200);
+
+    // 배경 아크
+    ctx.beginPath();
+    ctx.arc(100, 100, 80, Math.PI, 0);
+    ctx.strokeStyle = "#333";
+    ctx.lineWidth = 15;
+    ctx.stroke();
+
+    // 바늘
+    const angle = Math.PI + (current / 100) * Math.PI;
+    ctx.beginPath();
+    ctx.moveTo(100, 100);
+    ctx.lineTo(
+      100 + 70 * Math.cos(angle),
+      100 + 70 * Math.sin(angle)
+    );
+
+    // 🔹 바늘 색/글로우: +면 파란색 글로우, -면 빨간색, 0이면 기본 파랑
+    if (diff > 0) {
+      ctx.strokeStyle = "#4ea1ff"; // 파랑
+      ctx.shadowColor = "rgba(78, 161, 255, 0.9)";
+      ctx.shadowBlur = 14;
+    } else if (diff < 0) {
+      ctx.strokeStyle = "#ff6b6b"; // 빨강
+      ctx.shadowColor = "rgba(255, 107, 107, 0.8)";
+      ctx.shadowBlur = 8;
+    } else {
+      ctx.strokeStyle = "#388BFF"; // 변화 없음
+      ctx.shadowColor = "transparent";
+      ctx.shadowBlur = 0;
+    }
+
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    // 글로우 리셋
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = "transparent";
+
+    // 값 + 라벨
+    ctx.fillStyle = "white";
+    ctx.font = "16px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText(Math.round(current), 100, 120);
+    ctx.fillText(label, 100, 150);
+
+    // 🔹 Δ값: 더 크게, 굵게
+    if (diff !== 0) {
+      ctx.font = "bold 13px Arial";
+      ctx.fillStyle = diff > 0 ? "#8cff9a" : "#ff8c8c";
+      const sign = diff > 0 ? "+" : "−";
+      ctx.fillText(`${sign}${Math.abs(diff)}`, 100, 95);
+    }
+
+    if (t < 1) {
+      requestAnimationFrame(frame);
+    }
+  }
+
+  requestAnimationFrame(frame);
+}
+
+// =====================
 // 대시보드
 // =====================
 function updateDashboard() {
+  const prev = { ...lastGaugeValues };
   const { handling, efficiency, safety, comfort } = getTotals();
 
   updateChassisHighlight(handling, safety);
-  updateChassisSummary(handling, efficiency, safety, comfort);
+  updateChassisSummary();
 
-  drawGauge("handlingGauge",   handling,   "Handling");
-  drawGauge("efficiencyGauge", efficiency, "Efficiency");
-  drawGauge("safetyGauge",     safety,     "Safety");
-  drawGauge("comfortGauge",    comfort,    "Comfort");   
-}
+  animateGauge("handlingGauge",   prev.handling,   handling,   "Handling");
+  animateGauge("efficiencyGauge", prev.efficiency, efficiency, "Efficiency");
+  animateGauge("safetyGauge",     prev.safety,     safety,     "Safety");
+  animateGauge("comfortGauge",    prev.comfort,    comfort,    "Comfort");
 
-// =====================
-// 선택 표시
-// =====================
-function updateSelectionUI() {
-  const linkSpan = document.getElementById("current-link");
-  if (linkSpan) {
-    linkSpan.innerText = selectedParts.Link ? selectedParts.Link.name : "None";
-  }
-
-  document.getElementById("current-link").innerText =
-    selectedParts.Link ? selectedParts.Link.name : "None";
-
-  document.getElementById("current-suspension").innerText =
-    selectedParts.Suspension ? selectedParts.Suspension.name : "None";
-
-  document.getElementById("current-suspension").innerText =
-    selectedParts.Suspension ? selectedParts.Suspension.name : "None";
-
-  document.getElementById("current-brakes").innerText =
-    selectedParts.Brakes ? selectedParts.Brakes.name : "None";
-}
-
-// =====================
-// 게이지
-// =====================
-function drawGauge(id, value, label) {
-  const canvas = document.getElementById(id);
-  const ctx = canvas.getContext("2d");
-
-  ctx.clearRect(0, 0, 200, 200);
-
-  ctx.beginPath();
-  ctx.arc(100, 100, 80, Math.PI, 0);
-  ctx.strokeStyle = "#333";
-  ctx.lineWidth = 15;
-  ctx.stroke();
-
-  const angle = Math.PI + (value / 100) * Math.PI;
-
-  ctx.beginPath();
-  ctx.moveTo(100, 100);
-  ctx.lineTo(
-    100 + 70 * Math.cos(angle),
-    100 + 70 * Math.sin(angle)
-  );
-  ctx.strokeStyle = "#388BFF";
-  ctx.lineWidth = 4;
-  ctx.stroke();
-
-  ctx.fillStyle = "white";
-  ctx.font = "16px Arial";
-  ctx.textAlign = "center";
-  ctx.fillText(value, 100, 120);
-  ctx.fillText(label, 100, 150);
+  lastGaugeValues = { handling, efficiency, safety, comfort };
 }
 
 // =====================
@@ -568,22 +624,24 @@ function playSwapSound() {
 // =====================
 // 초기화
 // =====================
+lastGaugeValues = {
+  handling: 0,
+  efficiency: 0,
+  safety: 0,
+  comfort: 0
+};
+
+updateCornerLayers();
 updateDashboard();
-updateSelectionUI();
 updateButtonStates();
 updatePresetButtons();
 
 const dropZone = document.getElementById("drop-zone");
-
-dropZone.addEventListener("dragover", (e) => {
-  e.preventDefault();
-});
-
-dropZone.addEventListener("drop", (e) => {
+dropZone.addEventListener("dragover", e => e.preventDefault());
+dropZone.addEventListener("drop", e => {
   e.preventDefault();
   const category = e.dataTransfer.getData("category");
   const index = e.dataTransfer.getData("index");
-
   if (category && index !== "") {
     selectPart(category, Number(index));
   }

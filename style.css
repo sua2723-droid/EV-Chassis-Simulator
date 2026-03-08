@@ -53,7 +53,7 @@ body {
 
 /* LEFT SIDEBAR */
 .sidebar {
-  width: 25%;  /* 조금 넓게 */
+  width: 25%;
   padding: 20px;
   background: var(--panel-dark);
   border-right: 1px solid rgba(255, 255, 255, 0.06);
@@ -83,7 +83,6 @@ body {
   transition: background 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
 }
 
-/* 선택된 프리셋 버튼 하이라이트 */
 .preset-controls button.selected {
   background: var(--gm-blue);
   border-color: var(--gm-blue);
@@ -91,7 +90,6 @@ body {
   box-shadow: 0 0 10px rgba(0, 123, 255, 0.7);
 }
 
-/* 선택된 프리셋은 hover해도 파란색 유지 */
 .preset-controls button.selected:hover {
   background: var(--gm-blue);
   border-color: var(--gm-blue);
@@ -137,7 +135,7 @@ body {
   grid-column: 1 / -1;
 }
 
-/* 부품 카드: 큰 이미지 + 이름 + (숨겨진 spec) */
+/* 부품 카드 */
 .part-card {
   background: #1e2432;
   border-radius: 6px;
@@ -155,7 +153,6 @@ body {
   transform: translateY(-1px);
 }
 
-/* 썸네일 크게 */
 .part-card-thumbnail {
   width: 90px;
   height: 90px;
@@ -168,7 +165,7 @@ body {
 .part-card-thumbnail img {
   width: 160%;
   height: 160%;
-  object-fit: cover;    /* 꽉 채우고 남는 건 잘라냄 */
+  object-fit: cover;
   transform: translate(+7%, -30%);
 }
 
@@ -177,12 +174,10 @@ body {
   margin: 0;
 }
 
-/* spec은 카드 내에서 숨김 (툴팁으로만) */
 .part-card-spec {
   display: none;
 }
 
-/* 선택된 카드 */
 .part-card.selected {
   background: var(--gm-blue);
   border-color: var(--gm-blue);
@@ -191,13 +186,13 @@ body {
 
 /* CENTER */
 .main {
-  width: 55%;  /* 25 + 55 + 20 = 100 */
+  width: 55%;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* 샤시 컨테이너: 박스 제거, 이미지만 크게 */
+/* 샤시 컨테이너 */
 .chassis-container {
   position: relative;
   width: 90%;
@@ -211,27 +206,26 @@ body {
   transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-/* Handling 높음 */
 .chassis-container.high-handling {
   box-shadow: 0 0 26px rgba(0, 123, 255, 0.7);
 }
 
-/* Safety 낮음 */
 .chassis-container.low-safety {
   box-shadow: 0 0 22px rgba(255, 165, 0, 0.7);
 }
 
-/* 샤시 베이스 */
+/* 🔹 샤시 베이스를 img로 사용 */
 .chassis-base {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  background-image: url("images/chassis_base.png");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
+  object-fit: contain;
+  z-index: 1; /* 기준 레이어 */
 }
 
-/* 공통 파트 레이어 */
+/* 파트 레이어 */
 .part-layer {
   position: absolute;
   top: 0;
@@ -243,39 +237,43 @@ body {
   transition: opacity 0.4s ease;
   pointer-events: none;
 }
-
 .part-layer.show {
-  opacity: 1;}
+  opacity: 1;
+}
 
-.steering-layer { z-index: 3; }
-.brakes-layer   { z-index: 4; }
-.link-layer    { position:absolute; z-index: 2; }
-.suspension-layer { position:absolute; z-index: 1; } 
+/* 레이어 순서 */
+/* 브레이크 왼쪽을 샤시 뒤로 보내고 싶으면 샤시보다 낮은 z-index 사용 */
+.brakes-left-layer  { z-index: 0; }   /* 🔹 chassis-base(1) 뒤로 */
+.suspension-layer   { z-index: 2; }
+.link-layer         { z-index: 3; }
+.steering-layer     { z-index: 4; }
+.brakes-right-layer { z-index: 5; }    /* 오른쪽 코너는 맨 위 */
 
 /* RIGHT DASHBOARD */
 .dashboard {
   width: 20%;
-  padding: 20px;
+  padding: 16px 16px 8px;
   background: var(--panel-darker);
   border-left: 1px solid rgba(255, 255, 255, 0.06);
-  overflow-y: auto;
+  overflow-y: hidden;
 }
 
 .dashboard h2 {
-  margin-top: 0;
+ margin: 0 0 10px 0;  
 }
 
-.selected-info {
-  margin-top: 20px;
-  background: #333;
-  padding: 10px;
-  border-radius: 6px;
-}
-
-/* 게이지를 세로 한 줄씩 */
 .dashboard canvas {
   display: block;
-  margin: 0 auto 16px;
+  margin: 0 auto 10px;
+}
+
+/* 게이지 변화 텍스트 (작은 +X / -Y) */
+.gauge-delta {
+  text-align: center;
+  font-size: 11px;
+  color: #9fb4ff;
+  margin-top: -6px;
+  min-height: 14px;
 }
 
 /* Toast */
@@ -296,13 +294,12 @@ body {
   transition: opacity 0.2s ease, transform 0.2s ease;
   z-index: 1000;
 }
-
 #toast.show {
   opacity: 1;
   transform: translateY(0);
 }
 
-/* 샤시 한 줄 요약 텍스트 */
+/* 샤시 요약 텍스트 */
 .chassis-summary {
   position: absolute;
   left: 50%;

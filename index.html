@@ -18,20 +18,18 @@
 
   <!-- LEFT -->
   <div class="sidebar">
-  
-
     <div class="controls">
       <button id="undoBtn">↩ Undo</button>
       <button id="resetBtn">🔄 Reset</button>
     </div>
-    
-<h2>Chassis Parts</h2>
+
+    <h2>Chassis Parts</h2>
 
     <div class="preset-controls">
       <h3>Presets</h3>
-      <button data-preset="off-road" onclick="applyPreset('off-road')">Off-road Package</button>
-      <button data-preset="Sport" onclick="applyPreset('Sport')">Sport Package</button>
       <button data-preset="city" onclick="applyPreset('city')">City Package</button>
+      <button data-preset="Sport" onclick="applyPreset('Sport')">Sport Package</button>
+      <button data-preset="off-road" onclick="applyPreset('off-road')">Off-road Package</button>
     </div>
 
     <div id="categories"></div>
@@ -40,16 +38,17 @@
   <!-- CENTER -->
   <div class="main">
     <div class="chassis-container" id="drop-zone">
-      <div class="chassis-base"></div>
+      <!-- 🔹 샤시 베이스를 <img>로 -->
+      <img id="chassis-base" class="chassis-base" src="images/chassis_base.png" alt="Chassis Base">
 
       <img id="link-part" class="part-layer link-layer">
       <img id="suspension-part" class="part-layer suspension-layer">
-      <img id="brakes-part" class="part-layer brakes-layer">
+      <img id="brakes-left-part"  class="part-layer brakes-left-layer">
+      <img id="brakes-right-part" class="part-layer brakes-right-layer">
       <img id="steering-part" class="part-layer steering-layer">
 
-      <!-- 샤시 요약 텍스트 오버레이 -->
       <div id="chassis-summary" class="chassis-summary">
-        Select a package to see performance summary.
+        Select chassis parts
       </div>
     </div>
   </div>
@@ -62,21 +61,10 @@
     <canvas id="efficiencyGauge" width="200" height="200"></canvas>
     <canvas id="safetyGauge" width="200" height="200"></canvas>
     <canvas id="comfortGauge" width="200" height="200"></canvas>
-
-   
-
-    <div class="selected-info">
-      
-      <p>Link: <span id="current-link">None</span></p>
-      <p>Suspension: <span id="current-suspension">None</span></p>
-      <p>Brakes: <span id="current-brakes">None</span></p>
-      <p>Steering: <span id="current-steering">None</span></p>
-    </div>
   </div>
 
 </div>
 
-<!-- Toast -->
 <div id="toast"></div>
 
 <script src="script.js"></script>
